@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoBreak Card Demo</title>
+    <script type="module" src="../dist/ha-card-nobreak.js"></script>
+    <style>
+        body {
+            font-family: Roboto, sans-serif;
+            margin: 0;
+            padding: 24px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .mode-selector {
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .mode-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            background-color: #03a9f4;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-button.active {
+            background-color: #007ac1;
+        }
+
+        .mode-button:hover {
+            background-color: #007ac1;
+        }
+
+        /* Variables needed to imitate HA styles */
+        :root {
+            --primary-text-color: #212121;
+            --secondary-text-color: #727272;
+            --primary-color: #03a9f4;
+            --error-color: #db4437;
+            --warning-color: #ffa600;
+            --success-color: #43a047;
+            --divider-color: #e0e0e0;
+            --paper-item-icon-color: #44739e;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>NoBreak Card Demo</h2>
+            <p>Below is a demonstration of the NoBreak Card with mocked data.</p>
+        </div>
+
+        <div class="mode-selector">
+            <button class="mode-button active" data-status="online">Online</button>
+            <button class="mode-button" data-status="battery">On Battery</button>
+            <button class="mode-button" data-status="offline">Offline</button>
+        </div>
+
+        <ha-card-nobreak id="demo-card"></ha-card-nobreak>
+    </div>
+
+    <script>
+        // Wait for Custom Element to be loaded
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const card = document.getElementById('demo-card');
+                const modeButtons = document.querySelectorAll('.mode-button');
+
+                // Initialize card mock config
+                const config = {
+                    title: 'NoBreak / UPS',
+                    mock: true,
+                    show_status: true,
+                    show_battery: true,
+                    show_input_voltage: true,
+                    show_output_voltage: true,
+                    show_load: true,
+                    show_time_left: true
+                };
+
+                card.setConfig(config);
+
+                // Mock the Home Assistant object
+                card.hass = {
+                    states: {
+                        'sensor.nobreak': {
+                            state: 'online',
+                            attributes: {
+                                friendly_name: 'NoBreak / UPS',
+                                battery_level: 85,
+                                input_voltage: 127,
+                                output_voltage: 127,
+                                load: 43,
+                                time_left: '2h 15min',
+                            }
+                        }
+                    }
+                };
+
+                // Handle mode changes
+                modeButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        // Update active button
+                        modeButtons.forEach(b => b.classList.remove('active'));
+                        button.classList.add('active');
+
+                        const status = button.dataset.status;
+
+                        // Update card data based on selected status
+                        if (status === 'online') {
+                            card.hass = {
+                                states: {
+                                    'sensor.nobreak': {
+                                        state: 'online',
+                                        attributes: {
+                                            friendly_name: 'NoBreak / UPS',
+                                            battery_level: 85,
+                                            input_voltage: 127,
+                                            output_voltage: 127,
+                                            load: 43,
+                                            time_left: '2h 15min',
+                                        }
+                                    }
+                                }
+                            };
+                        } else if (status === 'battery') {
+                            card.hass = {
+                                states: {
+                                    'sensor.nobreak': {
+                                        state: 'battery',
+                                        attributes: {
+                                            friendly_name: 'NoBreak / UPS',
+                                            battery_level: 60,
+                                            input_voltage: 0,
+                                            output_voltage: 127,
+                                            load: 43,
+                                            time_left: '1h 30min',
+                                        }
+                                    }
+                                }
+                            };
+                        } else if (status === 'offline') {
+                            card.hass = {
+                                states: {
+                                    'sensor.nobreak': {
+                                        state: 'offline',
+                                        attributes: {
+                                            friendly_name: 'NoBreak / UPS',
+                                            battery_level: 0,
+                                            input_voltage: 0,
+                                            output_voltage: 0,
+                                            load: 0,
+                                            time_left: 'N/A',
+                                        }
+                                    }
+                                }
+                            };
+                        }
+                    });
+                });
+            }, 100);
+        });
+    </script>
+</body>
+
+</html>
